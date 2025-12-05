@@ -1,0 +1,3 @@
+[submodule "themes/brainwave"]
+	path = themes/brainwave
+	url = https://github.com/zhou-shi/barinwave.git

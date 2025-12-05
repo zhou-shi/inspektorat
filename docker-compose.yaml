@@ -1,0 +1,49 @@
+name: inspektorat
+
+services:
+  server:
+    container_name: hugo-dev-server
+    # Image Hugo dengan ekstensi (Node.js, Dart Sass, dll sudah include)
+    image: hugomods/hugo:exts-0.140.1
+    
+    # Menetapkan direktori kerja langsung ke dalam folder theme
+    # Ini membuat kita tidak perlu melakukan "cd themes/brainwave" lagi
+    working_dir: /src/themes/brainwave
+    
+    entrypoint: ["/bin/sh", "-c"]
+    
+    environment:
+      - HUGO_ENVIRONMENT=development
+      - TERM=xterm-256color
+      - FORCE_COLOR=true
+      - NPM_CONFIG_COLOR=always
+      - HUGO_SERVER_BIND=0.0.0.0 
+      - HUGO_URI=http://localhost:1313
+      - HUGO_LIVERELOADPORT=1313
+      
+    tty: true
+    stdin_open: true
+    
+    # Command: Install dependencies jika belum ada, lalu jalankan start script
+    # Kita menggunakan "|| true" pada npm install agar container tidak mati jika ada network hiccup
+    command: >
+      "npm install && npm run start"
+      
+    volumes:
+      # Mount root project ke /src
+      - ./:/src
+      
+      # Cache Hugo (biar build ulang cepat)
+      - hugo_cache:/tmp/hugo_cache
+      
+      # [PENTING] Teknik Nested Volume:
+      # Mencegah node_modules di dalam container tertimpa oleh folder lokal host yang kosong/beda OS.
+      # Pastikan nama folder sesuai dengan struktur folder Anda (brainwave).
+      - npm_cache:/src/themes/brainwave/node_modules
+      
+    ports:
+      - "1313:1313"
+
+volumes:
+  hugo_cache:
+  npm_cache:
